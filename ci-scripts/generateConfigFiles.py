@@ -36,6 +36,7 @@ class hssConfigGen():
 		self.realm = 'openairinterface.org'
 		self.users = '10'
 		self.nb_mmes = 1
+		self.is_home = False 
 
 	def GenerateHssConfigurer(self):
 		hssFile = open('./hss-cfg.sh', 'w')
@@ -52,6 +53,8 @@ class hssConfigGen():
 			hssFile.write('PREFIX=\'/openair-hss/etc\'\n')
 		else:
 			hssFile.write('PREFIX=\'/usr/local/etc/oai\'\n')
+		if self.is_home:
+			hssFile.write('FOREIGN_REALM=\'' + 'openairinterface.org' + '\'\n')
 		# The following variables could be later be passed as parameters
 		hssFile.write('MY_REALM=\'' + self.realm + '\'\n')
 		hssFile.write('MY_APN1=\'' + self.apn1 + '\'\n')
@@ -72,14 +75,20 @@ class hssConfigGen():
 			hssFile.write('mkdir -p logs\n')
 		hssFile.write('\n')
 		hssFile.write('# provision users\n')
-		hssFile.write('./data_provisioning_users --apn $MY_APN1 --apn2 $MY_APN2 --key $MY_LTE_K --imsi-first $MY_IMSI --msisdn-first 00000001 --mme-identity mme.$MY_REALM --no-of-users $MY_USERS --realm $MY_REALM --truncate True --verbose True --cassandra-cluster $Cassandra_Server_IP\n')
-		hssFile.write('# provision mme\n')
-		hssFile.write('./data_provisioning_mme --id 3 --mme-identity mme.$MY_REALM --realm $MY_REALM --ue-reachability 1 --truncate True  --verbose True -C $Cassandra_Server_IP\n')
-		if self.nb_mmes > 1:
-			i = 1
-			while i < self.nb_mmes:
-				hssFile.write('./data_provisioning_mme --id ' + str(i+3) + ' --mme-identity mme' + str(i) + '.$MY_REALM --realm $MY_REALM --ue-reachability 1 --truncate False  --verbose True -C $Cassandra_Server_IP\n')
-				i += 1
+		if not self.is_home:
+			hssFile.write('./data_provisioning_users --apn $MY_APN1 --apn2 $MY_APN2 --key $MY_LTE_K --imsi-first $MY_IMSI --msisdn-first 00000001 --mme-identity mme.$MY_REALM --no-of-users $MY_USERS --realm $MY_REALM --truncate True --verbose True --cassandra-cluster $Cassandra_Server_IP\n')
+			hssFile.write('# provision mme\n')
+			hssFile.write('./data_provisioning_mme --id 3 --mme-identity mme.$MY_REALM --realm $MY_REALM --ue-reachability 1 --truncate True  --verbose True -C $Cassandra_Server_IP\n')
+			if self.nb_mmes > 1:
+				i = 1
+				while i < self.nb_mmes:
+					hssFile.write('./data_provisioning_mme --id ' + str(i+3) + ' --mme-identity mme' + str(i) + '.$MY_REALM --realm $MY_REALM --ue-reachability 1 --truncate False  --verbose True -C $Cassandra_Server_IP\n')
+					i += 1
+		else: 
+			hssFile.write('./data_provisioning_users --apn $MY_APN1 --apn2 $MY_APN2 --key $MY_LTE_K --imsi-first $MY_IMSI --msisdn-first 00000001 --mme-identity mme.$FOREIGN_REALM --no-of-users $MY_USERS --realm $FOREIGN_REALM --truncate True --verbose True --cassandra-cluster $Cassandra_Server_IP\n')
+			hssFile.write('# provision mme\n')
+			hssFile.write('./data_provisioning_mme --id 3 --mme-identity mme.$FOREIGN_REALM --realm $FOREIGN_REALM --ue-reachability 1 --truncate True  --verbose True -C $Cassandra_Server_IP\n')
+			
 		hssFile.write('\n')
 		if not self.fromDockerFile:
 			hssFile.write('cp ../etc/acl.conf ../etc/hss_rel14_fd.conf $PREFIX/freeDiameter\n')
@@ -194,6 +203,8 @@ while len(argvs) > 1:
 		myHSS.fromDockerFile = True
 	elif re.match('^\-\-env_for_entrypoint', myArgv, re.IGNORECASE):
 		myHSS.envForEntrypoint = True
+	elif re.match('^\-\-is_home', myArgv, re.IGNORECASE):
+		myHSS.is_home = True
 	else:
 		Usage()
 		sys.exit('Invalid Parameter: ' + myArgv)
