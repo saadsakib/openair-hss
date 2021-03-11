@@ -87,7 +87,7 @@ class hssConfigGen():
 		else: 
 			hssFile.write('./data_provisioning_users --apn $MY_APN1 --apn2 $MY_APN2 --key $MY_LTE_K --imsi-first $MY_IMSI --msisdn-first 00000001 --mme-identity mme.$MY_REALM --no-of-users $MY_USERS --realm $MY_REALM --truncate True --verbose True --cassandra-cluster $Cassandra_Server_IP\n')
 			hssFile.write('# provision mme\n')
-			hssFile.write('./data_provisioning_mme --id 4 --mme-identity mme.$MY_REALM --realm $MY_REALM --ue-reachability 1 --truncate True  --verbose True -C $Cassandra_Server_IP\n')
+			hssFile.write('./data_provisioning_mme --id 4 --mme-identity mme4.$MY_REALM --realm $MY_REALM --ue-reachability 1 --truncate True  --verbose True -C $Cassandra_Server_IP\n')
 			hssFile.write('./data_provisioning_mme --id 3 --mme-identity mme.$FOREIGN_REALM --realm $FOREIGN_REALM --ue-reachability 1 --truncate True  --verbose True -C $Cassandra_Server_IP\n')
 			
 		hssFile.write('\n')
