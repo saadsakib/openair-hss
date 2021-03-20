@@ -89,6 +89,7 @@ class hssConfigGen():
 			hssFile.write('# provision mme\n')
 			hssFile.write('./data_provisioning_mme --id 3 --mme-identity mme.$FOREIGN_REALM --realm $FOREIGN_REALM --ue-reachability 1 --truncate True  --verbose True -C $Cassandra_Server_IP\n')
 			hssFile.write('./data_provisioning_mme --id 4 --mme-identity mme.$MY_REALM --realm $MY_REALM --ue-reachability 1 --truncate False  --verbose True -C $Cassandra_Server_IP\n')
+			hssFile.write('./data_provisioning_mme --id 5 --mme-identity mme.proxy.co --realm proxy.co --ue-reachability 1 --truncate False  --verbose True -C $Cassandra_Server_IP\n')
 			
 		hssFile.write('\n')
 		if not self.fromDockerFile:
